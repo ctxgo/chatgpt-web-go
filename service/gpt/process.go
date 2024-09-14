@@ -1,23 +1,25 @@
 package gpt
 
 import (
-	"chatgpt-web-new-go/common/aiClient"
+	"chatgpt-web-new-go/common/aiclient"
 	"chatgpt-web-new-go/common/bizError"
 	"chatgpt-web-new-go/common/goUtil"
 	"chatgpt-web-new-go/common/logs"
 	"chatgpt-web-new-go/common/types"
+
+	aiTypes "chatgpt-web-new-go/common/aiclient/types"
 	"chatgpt-web-new-go/dao"
 	"chatgpt-web-new-go/model"
 	"fmt"
+
 	"github.com/gin-gonic/gin"
-	gogpt "github.com/sashabaranov/go-openai"
 )
 
 const (
 	coinPerMessage = -1
 )
 
-func Process(ctx *gin.Context, r *Request, uid int64) (stream *gogpt.ChatCompletionStream, err error) {
+func Process(ctx *gin.Context, r *Request, uid int64) (stream <-chan aiTypes.StreamData, err error) {
 	// Deduction of points
 	du := dao.Q.User
 	updateInfo, err := du.WithContext(ctx).Where(du.ID.Eq(uid)).UpdateSimple(du.Integral.Add(coinPerMessage))
@@ -31,33 +33,28 @@ func Process(ctx *gin.Context, r *Request, uid int64) (stream *gogpt.ChatComplet
 		return
 	}
 
-	request := gogpt.ChatCompletionRequest{
-		Model:            r.Options.Model,
-		MaxTokens:        r.Options.MaxTokens,
-		Temperature:      r.Options.Temperature,
-		PresencePenalty:  r.Options.PresencePenalty,
-		FrequencyPenalty: r.Options.FrequencyPenalty,
-		Messages: []gogpt.ChatCompletionMessage{
-			{
-				Role:    gogpt.ChatMessageRoleAssistant,
-				Content: r.Prompt,
-			},
-		},
-		Stream: true,
-	}
-
 	// cnf.Model 是否在 chatModels 中
-	gptClient := aiClient.GetGptClient()
-	if gptClient == nil {
-		logs.Error("gptClient is nil!")
+	chat, err := aiclient.GetChat(r.ParentMessageId, r.Options.AiType)
+	if err != nil {
+		logs.Logger.Errorf("get client err: %v!", err)
 		return nil, bizError.AiKeyNoneUsefullError
 	}
 
-	stream, err = gptClient.OpenAIClient.CreateChatCompletionStream(ctx, request)
+	stream, err = chat.SendStreamMessage(ctx, aiTypes.TextMessage{
+		Options: aiTypes.Options{
+			Model:            r.Options.Model,
+			MaxTokens:        r.Options.MaxTokens,
+			Temperature:      r.Options.Temperature,
+			PresencePenalty:  r.Options.PresencePenalty,
+			FrequencyPenalty: r.Options.FrequencyPenalty,
+		},
+		Prompt: r.Prompt,
+	})
 	if err != nil {
 		logs.Error("aiClient client.CreateChatCompletion bizError:%v", err)
+		aiKey := chat.GetClient().GetClientKey()
 		goUtil.New(func() {
-			refreshKey(gptClient)
+			refreshKey(aiKey)
 		})
 		return nil, err
 	}
@@ -75,13 +72,10 @@ func Process(ctx *gin.Context, r *Request, uid int64) (stream *gogpt.ChatComplet
 	return
 }
 
-func refreshKey(client *aiClient.GptClient) {
-	aiKey := client.Model
-
-	aiKey.Status = 0
+func refreshKey(aiKey string) {
 
 	da := dao.Q.Aikey
-	resultInfo, err := da.Where(da.ID.Eq(aiKey.ID)).Update(da.Status, 0)
+	resultInfo, err := da.Where(da.Key.Eq(aiKey)).Update(da.Status, 0)
 	if err != nil {
 		logs.Error("aiKey update error: %v", err)
 		return
@@ -91,8 +85,6 @@ func refreshKey(client *aiClient.GptClient) {
 		return
 	}
 
-	// refresh
-	aiClient.DoInitClient()
 }
 
 func insertTurnOverRecord(ctx *gin.Context, r *Request, uid int64) {
@@ -114,9 +106,9 @@ func addMessage(ctx *gin.Context, r *Request, uid int64) {
 		UserID:           uid,
 		Content:          r.Prompt,
 		PersonaID:        types.InterfaceToInt64(r.PersonaId),
-		Role:             gogpt.ChatMessageRoleUser,
+		Role:             aiTypes.MessageRoleUser,
 		FrequencyPenalty: int32(r.Options.FrequencyPenalty),
-		MaxTokens:        int32(r.Options.MaxTokens),
+		MaxTokens:        *r.Options.MaxTokens,
 		Model:            r.Options.Model,
 		PresencePenalty:  int32(r.Options.PresencePenalty),
 		Temperature:      int32(r.Options.Temperature),
@@ -128,5 +120,4 @@ func addMessage(ctx *gin.Context, r *Request, uid int64) {
 	if err != nil {
 		logs.Error("message create error: %v", err)
 	}
-	return
 }

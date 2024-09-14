@@ -1,6 +1,7 @@
 package message
 
 import (
+	"chatgpt-web-new-go/common/aiclient"
 	"chatgpt-web-new-go/common/logs"
 	"chatgpt-web-new-go/common/types"
 	"chatgpt-web-new-go/dao"
@@ -12,7 +13,7 @@ import (
 func MessageList(ctx context.Context, uid int64) (result []*Message, err error) {
 	dm := dao.Q.Message
 
-	messages, err := dm.WithContext(ctx).Where(dm.UserID.Eq(uid)).Find()
+	messages, err := dm.WithContext(ctx).Where(dm.UserID.Eq(uid), dm.IsDelete.Eq(0)).Find()
 	if err != nil {
 		logs.Error("message find error: %v", err)
 		return
@@ -76,15 +77,13 @@ func MessageList(ctx context.Context, uid int64) (result []*Message, err error) 
 	return
 }
 
-func AdminMessageList(ctx context.Context) (result []*model.Message, err error) {
+func AdminMessageList(ctx context.Context, page, size int) (result []*model.Message, count int64, err error) {
 	dm := dao.Q.Message
-
-	result, err = dm.WithContext(ctx).Where(dm.IsDelete.Eq(0)).Find()
+	result, count, err = dm.WithContext(ctx).Where(dm.IsDelete.Eq(0)).FindByPage((page-1)*size, size)
 	if err != nil {
 		logs.Error("admin message find error: %v", err)
 		return
 	}
-
 	return
 }
 
@@ -106,7 +105,7 @@ func MessageAdd(ctx context.Context, uid int64, r *gpt.Request, msgList []*ChatP
 		PersonaID:        types.InterfaceToInt64(r.PersonaId),
 		Role:             msgHead.Role,
 		FrequencyPenalty: int32(r.Options.FrequencyPenalty),
-		MaxTokens:        int32(r.Options.MaxTokens),
+		MaxTokens:        *r.Options.MaxTokens,
 		Model:            r.Options.Model,
 		PresencePenalty:  int32(r.Options.PresencePenalty),
 		Temperature:      int32(r.Options.Temperature),
@@ -118,4 +117,33 @@ func MessageAdd(ctx context.Context, uid int64, r *gpt.Request, msgList []*ChatP
 	if err != nil {
 		logs.Error("message create error: %v", err)
 	}
+}
+
+func MessageDel(ctx context.Context, uid int64, r *Request) (err error) {
+	dm := dao.Q.Message
+
+	if r.ParentMessageId != "delAll" {
+		_, err = dm.WithContext(ctx).Where(dm.ParentMessageID.Eq(r.ParentMessageId)).Delete()
+		if err != nil {
+			logs.Error("message delete error: %v", err)
+			return
+		}
+		aiclient.DelChat(r.ParentMessageId)
+		return
+	}
+
+	messages, err := dm.WithContext(ctx).Where(dm.UserID.Eq(uid), dm.IsDelete.Eq(0)).Find()
+	if err != nil {
+		logs.Error("message find error: %v", err)
+		return
+	}
+	_, err = dm.WithContext(ctx).Where(dm.UserID.Eq(uid)).Update(dm.IsDelete, 1)
+	if err != nil {
+		logs.Error("message delete error: %v", err)
+		return
+	}
+	for _, m := range messages {
+		aiclient.DelChat(m.ParentMessageID)
+	}
+	return
 }

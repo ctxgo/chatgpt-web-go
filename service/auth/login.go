@@ -10,8 +10,10 @@ import (
 	"chatgpt-web-new-go/common/redis"
 	"chatgpt-web-new-go/dao"
 	"chatgpt-web-new-go/model"
+	"context"
 	"errors"
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -120,7 +122,7 @@ func loginCodeValid(phone string, code string) bool {
 	}
 
 	key := fmt.Sprintf(redis.KeySnsCode, phone)
-	codeFromRedis, err := config.Redis.Get(key).Result()
+	codeFromRedis, err := config.Redis.Get(context.Background(), key).Result()
 	if err != nil {
 		logs.Warn("redis get: %v bizError: %v", key, err)
 		return false
@@ -132,7 +134,7 @@ func loginCodeValid(phone string, code string) bool {
 	}
 
 	// expire code
-	_ = config.Redis.Del(key)
+	_ = config.Redis.Del(context.Background(), key)
 
 	return true
 }

@@ -5,11 +5,19 @@ db:
   host: 127.0.0.1:3306
   hostR1: 127.0.0.1:3306
   user: root
-  password: 12345
+  password: yourpassword
   name: chatgpt_web_new_go
 
 redis:
   addr: 127.0.0.1:6379
+  password: yourpassword
 
-gpt:
-  proxy: # 代理支持 socks5h://x.x.x.x 或者 http://x.x.x.x
+aiClient:
+  proxy: xxxxxxxxxxxxx
+
+emailServer:
+  host: "xxxxxxxxxx"
+  port: "587"
+  SenderName: xxxxxx
+  User: xxxxxxxxx
+  Password: xxxxxx

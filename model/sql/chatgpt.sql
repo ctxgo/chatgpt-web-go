@@ -137,10 +137,10 @@ INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, up
 INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (6, 'draw_price', '50', '绘画价格 ', '2023-05-25 16:58:26', '2023-07-10 22:06:58');
 INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (7, 'shop_introduce', '<p><br></p>', '商城介绍', '2023-05-29 11:51:39', '2023-07-11 00:42:36');
 INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (8, 'user_introduce', '<p><br></p>', '用户中心介绍', '2023-05-29 11:52:07', '2023-07-11 00:42:39');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (9, 'website_title', 'ChatGpt', '网站标题', '2023-06-07 11:08:56', '2023-07-11 09:44:00');
+INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (9, 'website_title', 'openai', '网站标题', '2023-06-07 11:08:56', '2023-07-11 09:44:00');
 INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (10, 'website_description', '我是一个基于OpenAI的ChatGpt应用。', '网站描述', '2023-06-07 11:08:57', '2023-07-09 22:23:14');
 INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (11, 'website_keywords', 'Openai,chat,Gpt,AI', '网站关键词', '2023-06-07 11:09:44', '2023-07-09 22:23:14');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (12, 'website_logo', 'https://u1.dl0.cn/icon/openailogo.svg', '网站logo', '2023-06-07 11:10:05', '2023-06-07 13:01:39');
+INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (12, 'website_logo', 'local', '网站logo', '2023-06-07 11:10:05', '2023-06-07 13:01:39');
 INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (13, 'website_footer', '', '网站页脚信息html', '2023-06-07 11:12:13', '2023-06-20 19:32:16');
 INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (14, 'prohibited_words', '习近平,共产党', '违禁词', '2023-06-09 10:04:13', '2023-06-09 12:55:50');
 INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (15, 'tuputech_key', '', '内容检查KEY', '2023-06-09 11:20:51', '2023-06-10 17:37:28');

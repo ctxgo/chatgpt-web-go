@@ -50,7 +50,7 @@ const (
                 <p>以下是您本次请求的验证码，验证码有效期为10分钟，请勿透露给他人:</p>
                 <div class="code">%s</div>
                 <div class="btn-container">
-                    <a class="btn" href="https://www.ourai.club">返回OurAI官网</a>
+                    <a class="btn" href="https://xxxxx.xxxxx.xxxxx">返回OurAI官网</a>
                 </div>
             </div>
         </body>

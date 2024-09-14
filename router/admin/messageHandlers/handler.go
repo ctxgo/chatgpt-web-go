@@ -4,6 +4,7 @@ import (
 	"chatgpt-web-new-go/common/logs"
 	"chatgpt-web-new-go/router/base"
 	"chatgpt-web-new-go/service/message"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,12 +16,16 @@ func MessageList(c *gin.Context) {
 		return
 	}
 
-	result, err := message.AdminMessageList(c)
+	result, count, err := message.AdminMessageList(c, request.Page, request.PageSize)
 	if err != nil {
 		logs.Error("message list error: %v", err)
-		base.Fail(c, "回话列表异常："+err.Error())
+		base.Fail(c, "查询会话列表异常："+err.Error())
 		return
 	}
 
-	base.Success(c, result)
+	base.Success(c, base.PageResponse{
+		Count: count,
+		Rows:  result,
+	})
+
 }

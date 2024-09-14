@@ -2,7 +2,9 @@ package redis
 
 import (
 	"chatgpt-web-new-go/common/config"
-	"github.com/go-redis/redis"
+	"context"
+
+	"github.com/redis/go-redis/v9"
 )
 
 func Init() {
@@ -13,8 +15,15 @@ func Init() {
 		DB:       redisConfig.DB,       // 使用默认数据库
 	})
 
-	_, err := config.Redis.Ping().Result()
+	err := connect(config.Redis)
 	if err != nil {
 		panic(err)
 	}
+}
+
+// connect connect test
+func connect(r *redis.Client) error {
+	var err error
+	_, err = r.Ping(context.TODO()).Result()
+	return err
 }

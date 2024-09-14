@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/go-redis/redis"
+	"github.com/redis/go-redis/v9"
 	"github.com/robfig/cron/v3"
 	"gopkg.in/gomail.v2"
 	"gorm.io/gorm"

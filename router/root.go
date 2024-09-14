@@ -15,6 +15,7 @@ import (
 	"chatgpt-web-new-go/router/front/turnoverHandlers"
 	"chatgpt-web-new-go/router/front/userHandlers"
 	"chatgpt-web-new-go/router/middlewares"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -120,6 +121,8 @@ func userGroup(group *gin.RouterGroup) {
 	group.PUT("/password", authHandlers.UserPasswordResetHandler)
 
 	group.GET("/messages", messageHandlers.MessageList)
+	group.DELETE("/messages", messageHandlers.MessageDel)
+
 }
 
 func chatGroup(group *gin.RouterGroup) {

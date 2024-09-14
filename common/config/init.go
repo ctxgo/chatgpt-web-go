@@ -4,13 +4,17 @@ import (
 	"chatgpt-web-new-go/common/env"
 	"context"
 	"flag"
+	"log"
+	"os"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"log"
 )
 
 func InitConfig() {
+	configFile := InitConfigWithFlag() // 使用配置文件路径
+
 	v := viper.New()
 
 	// env initializer
@@ -20,12 +24,7 @@ func InitConfig() {
 	v.SetConfigName(e)
 
 	//添加配置文件所在的路径,注意在Linux环境下%GOPATH要替换为$GOPATH
-	v.AddConfigPath("%GOPATH/src/")
-	v.AddConfigPath("./")
-	v.AddConfigPath("./config")
-	v.AddConfigPath("./../config")
-	v.AddConfigPath("./../../config")
-	v.AddConfigPath("./../../../config")
+	v.SetConfigFile(configFile)
 
 	//设置配置文件类型
 	v.SetConfigType("yml")
@@ -45,6 +44,24 @@ func InitConfig() {
 
 	log.Printf("global config: %v \n", Config)
 	go watchConfigChange(v)
+}
+
+func InitConfigWithFlag() string {
+	var configfile = pflag.StringP("config", "c", "", "Use -c to set your config file")
+
+	pflag.Parse()
+
+	if pflag.NArg() != 0 || *configfile == "" {
+		pflag.Usage()
+		os.Exit(1)
+	}
+
+	// 检查配置文件是否存在
+	if _, err := os.Stat(*configfile); err != nil {
+		panic(err)
+	}
+
+	return *configfile
 }
 
 // 监听配置文件的修改和变动

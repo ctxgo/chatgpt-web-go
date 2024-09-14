@@ -1,7 +1,9 @@
 package chatHandlers
 
 import (
+	aiTypes "chatgpt-web-new-go/common/aiclient/types"
 	authGlobal "chatgpt-web-new-go/common/auth"
+	"chatgpt-web-new-go/common/bizError"
 	"chatgpt-web-new-go/common/goUtil"
 	"chatgpt-web-new-go/common/logs"
 	"chatgpt-web-new-go/common/types"
@@ -10,10 +12,13 @@ import (
 	"chatgpt-web-new-go/service/gpt"
 	"chatgpt-web-new-go/service/message"
 	"encoding/json"
-	"errors"
-	"github.com/gin-gonic/gin"
+	"regexp"
+
 	"io"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 )
 
 func ChatListHandler(c *gin.Context) {
@@ -42,7 +47,14 @@ func ChatCompletionsHandler(c *gin.Context) {
 	}
 
 	u := uFromCtx.(*model.User)
-
+	model, aiType, err := parseModel(request.Options.Model)
+	if err != nil {
+		logs.Logger.Error(err)
+		base.Fail(c, bizError.AiKeyModeParesError.Error())
+		return
+	}
+	request.Options.AiType = aiType
+	request.Options.Model = model
 	stream, err := gpt.Process(c, &request, u.ID)
 	if err != nil {
 		logs.Error("aiClient Process bizError: %v", err)
@@ -50,73 +62,26 @@ func ChatCompletionsHandler(c *gin.Context) {
 		return
 	}
 
-	defer stream.Close()
-
-	chanStream := make(chan *message.ChatProcessResponse, 100)
-	go func() {
-		defer stream.Close()
-		defer close(chanStream)
-		for i := 0; ; i++ {
-			response, err := stream.Recv()
-			if errors.Is(err, io.EOF) {
-				logs.Debug("Stream finished")
-				chanStream <- message.StopResponse
-				return
-			}
-
-			if err != nil {
-				logs.Error("Stream error: %v\n", err)
-				chanStream <- message.ErrorResponse
-				return
-			}
-			if len(response.Choices) == 0 {
-				logs.Debug("Stream finished")
-				chanStream <- message.StopResponse
-				return
-			}
-
-			choice := response.Choices[0]
-			data := &message.ChatProcessResponse{
-				ID:              response.ID,
-				Role:            choice.Delta.Role,
-				Segment:         message.SegmentText,
-				DateTime:        time.Now().Format(types.TimeFormatDate),
-				Content:         choice.Delta.Content,
-				ParentMessageID: message.AssistantMessageId,
-			}
-
-			if i == 0 {
-				data.Segment = message.SegmentStart
-			}
-
-			if choice.FinishReason == message.SegmentStop {
-				data.Segment = message.SegmentStop
-			}
-
-			chanStream <- data
-
-			if choice.FinishReason == message.SegmentStop {
-				return
-			}
-		}
-	}()
-
 	var msgList []*message.ChatProcessResponse
 	c.Stream(func(w io.Writer) bool {
-		if msg, ok := <-chanStream; ok {
-			if msg == message.ErrorResponse {
-				return false
+		if data, ok := <-stream; ok {
+			msg := &message.ChatProcessResponse{
+				Role:            aiTypes.MessageRoleModel,
+				Segment:         message.SegmentText,
+				DateTime:        time.Now().Format(types.TimeFormatDate),
+				Content:         data.Data,
+				ParentMessageID: request.ParentMessageId,
 			}
-
+			if data.Err != nil {
+				logs.Error("aiClient Process bizError: %v", data.Err)
+				msg.Content = data.Err.Error()
+			}
 			msgList = append(msgList, msg)
 
 			marshal, _ := json.Marshal(msg)
 			write, err := w.Write(marshal)
 			if err != nil {
 				logs.Error("w write error: %v, write: %v", err, write)
-				return false
-			}
-			if msg == message.StopResponse {
 				return false
 			}
 
@@ -129,4 +94,20 @@ func ChatCompletionsHandler(c *gin.Context) {
 	goUtil.New(func() {
 		message.MessageAdd(c, u.ID, &request, msgList)
 	})
+}
+
+func parseModel(model string) (string, string, error) {
+	// 正则表达式用于匹配 'model(aiType)' 格式
+	re := regexp.MustCompile(`^(.*)\((.*)\)$`)
+
+	// 使用正则表达式匹配并提取
+	matches := re.FindStringSubmatch(model)
+
+	// 如果匹配成功，返回 model 和 aiType
+	if len(matches) == 3 {
+		return matches[1], matches[2], nil // matches[1] 是 model, matches[2] 是 aiType
+	}
+
+	// 如果格式不正确，返回空值
+	return "", "", errors.Errorf("模型格式无法解析，%v", model)
 }

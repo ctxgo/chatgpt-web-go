@@ -7,19 +7,15 @@ A commercially-viable ChatGpt web application built with Go.
 
 可部署商业化的 ChatGpt 网页应用。
 
-💡 本项目是后端服务，前端对应的项目是：[79E/ChatGPT-Web](https://github.com/79E/ChatGPT-Web/)
+> [!IMPORTANT]
+> **此项目 Fork 自 [neoean/chatgpt-web-go](https://github.com/neoean/chatgpt-web-go)**
+>
+> 添加 gemini 支持
 
-
-[提交问题 Issues](https://github.com/heimeropen/chatgpt-web-go/issues)
+💡 本项目是后端服务，前端对应的项目是：[79E/ChatGPT-Web](https://github.com/ctxgo/ChatGpt-Web)
 
 
 </div>
-
-## 交流群
-
-<a href='https://t.me/+DDQufJfXm9s2OTQx' target='_blank'>
-<img width='46%' style="border-radius: 12px;" src='https://www.helloimg.com/images/2023/06/20/otDPwM.png'  alt="chatgpt-web-go"/>
-</a>
 
 
 ## 主要功能
@@ -53,7 +49,7 @@ A commercially-viable ChatGpt web application built with Go.
 **1.先 `Fork` 本项目，然后克隆到本地。**
 ```
 建议目录 ~/go/src/github.com/heimeropen/
-git clone https://github.com/heimeropen/chatgpt-web-go.git
+git clone https://github.com/ctxgo/chatgpt-web-go.git
 ```
 
 **2.导入sql**
@@ -71,22 +67,24 @@ port: 8899
 db:
   type: mysql
   host: 127.0.0.1:3306
+  hostR1: 127.0.0.1:3306
   user: root
-  password: 123456
-  name: chatgpt_web_go
+  password: yourpassword
+  name: chatgpt_web_new_go
 
 redis:
   addr: 127.0.0.1:6379
+  password: yourpassword
 
-gpt:
-  proxy: # 代理支持 socks5h://x.x.x.x 或者 http://x.x.x.x
+aiClient:
+  proxy: xxxxxxxxxxxxx
 
 emailServer:
-  host: 
-  port: 
-  senderName: 
-  user: 
-  password: 
+  host: "xxxxxxxxxx"
+  port: "587"
+  SenderName: xxxxxx
+  User: xxxxxxxxx
+  Password: xxxxxx
 ```
 
 **4.运行**
@@ -97,10 +95,10 @@ emailServer:
 ```
 
 **前端服务**
-```
-前端服务安装参考：
-https://github.com/79E/ChatGpt-Web/blob/master/README.md
 
+前端服务安装参考：
+[79E/ChatGPT-Web](https://github.com/ctxgo/ChatGpt-Web)
+```
 前端项目需要修改配置文件 .env.development, 指向本地服务端：
 VITE_APP_REQUEST_HOST=http://127.0.0.1:8899
 ```

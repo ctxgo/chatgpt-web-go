@@ -49,6 +49,7 @@ var (
 	AiKeyTokenDeleteError = NewBizError(170000, "Token删除异常！")
 	AiKeyTokenUpdateError = NewBizError(170001, "Token更新异常！")
 	AiKeyNoneUsefullError = NewBizError(170002, "无可用Token！")
+	AiKeyModeParesError   = NewBizError(170003, "模型解析失败")
 
 	PaymentDeleteError = NewBizError(180000, "支付配置删除异常！")
 	PaymentUpdateError = NewBizError(180001, "支付配置更新异常！")

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"chatgpt-web-new-go/common/aiClient"
+	"chatgpt-web-new-go/common/aiclient"
 	"chatgpt-web-new-go/common/config"
 	"chatgpt-web-new-go/common/db"
 	"chatgpt-web-new-go/common/email"
@@ -9,6 +9,7 @@ import (
 	"chatgpt-web-new-go/common/redis"
 	"chatgpt-web-new-go/router"
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,7 +30,7 @@ func main() {
 	email.InitEmailDialer()
 
 	// aiClient init
-	aiClient.Init()
+	aiclient.InitClients()
 
 	// gin init
 	engine := gin.Default()
@@ -39,7 +40,7 @@ func main() {
 
 	// listen init
 	port := fmt.Sprintf("%v", config.Config.Port)
-	err := engine.Run("127.0.0.1:" + port)
+	err := engine.Run("0.0.0.0:" + port)
 	if err != nil {
 		logs.Error("run webserver error %v", err)
 		panic(err)

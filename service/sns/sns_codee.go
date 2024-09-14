@@ -9,6 +9,7 @@ import (
 	"chatgpt-web-new-go/common/random"
 	"chatgpt-web-new-go/common/redis"
 	"chatgpt-web-new-go/common/regexp"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -32,7 +33,7 @@ func SendCode(source string) error {
 
 	// 2. store code
 	key := fmt.Sprintf(redis.KeySnsCode, source)
-	if err := config.Redis.Set(key, snsCode, 20*time.Minute).Err(); err != nil {
+	if err := config.Redis.Set(context.Background(), key, snsCode, 20*time.Minute).Err(); err != nil {
 		return err
 	}
 
@@ -66,14 +67,14 @@ func apiSendSnsCode(phone, code string) error {
 
 	data := url.Values{}
 
-	data.Set("accesskey", "1QQRVwDIBvQ3nSnd")
-	data.Set("secret", "Ib87ISCYEfYbsF51WGkXAdt61HhrmW7V")
-	data.Set("signin", "【云上AI】")
-	data.Set("templateId", "182578")
+	data.Set("accesskey", "xxxxxx")
+	data.Set("secret", "xxxxxxxx")
+	data.Set("signin", "xxxxxx")
+	data.Set("templateId", "xxxxx")
 	data.Set("mobile", phone)
 	data.Set("content", code)
 
-	resp, err := http.PostForm("https://api.1cloudsp.com/api/v2/single_send", data)
+	resp, err := http.PostForm("xxxxxxxxxxx", data)
 	if err != nil {
 		logs.Error("http.PostForm erorr: %v", err)
 		return err
