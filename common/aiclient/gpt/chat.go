@@ -49,6 +49,50 @@ func NewChat(opts ...ChatOpt) *Chat {
 	return chat
 }
 
+func (s *Chat) SetMaxHistory(maxHistory int) {
+	s.Lock()
+	defer s.Unlock()
+	s.maxHistory = maxHistory
+}
+
+func (s *Chat) GetMaxHistory() int {
+	s.RLock()
+	defer s.RUnlock()
+	return s.maxHistory
+}
+
+func (s *Chat) SetEnableChatContext(en bool) {
+	s.Lock()
+	defer s.Unlock()
+	s.enableChatContext = en
+}
+
+func (s *Chat) GetEnableChatContext() bool {
+	s.RLock()
+	defer s.RUnlock()
+	return s.enableChatContext
+}
+
+func (s *Chat) SetClient(c types.IClient) error {
+	s.Lock()
+	defer s.Unlock()
+	if client, ok := c.(*Client); ok {
+		s.client = client
+		return nil
+	}
+	return errors.Errorf("unkonw client type: %v", c)
+}
+
+func (s *Chat) GetClient() types.IClient {
+	s.RLock()
+	defer s.RUnlock()
+	return s.client
+}
+
+func (s *Chat) GetChatType() string {
+	return "openai"
+}
+
 func (s *Chat) loadMessage(message openai.ChatCompletionMessage) []openai.ChatCompletionMessage {
 	defer s.AddHistory(message.Content, openai.ChatMessageRoleUser)
 
@@ -142,44 +186,4 @@ func (s *Chat) addHistory(message string, role string) {
 		Content: message,
 		Role:    role,
 	})
-}
-
-func (s *Chat) SetMaxHistory(maxHistory int) {
-	s.Lock()
-	defer s.Unlock()
-	s.maxHistory = maxHistory
-}
-
-func (s *Chat) GetMaxHistory() int {
-	s.RLock()
-	defer s.RUnlock()
-	return s.maxHistory
-}
-
-func (s *Chat) SetEnableChatContext(en bool) {
-	s.Lock()
-	defer s.Unlock()
-	s.enableChatContext = en
-}
-
-func (s *Chat) GetEnableChatContext() bool {
-	s.RLock()
-	defer s.RUnlock()
-	return s.enableChatContext
-}
-
-func (s *Chat) SetClient(c types.IClient) error {
-	s.Lock()
-	defer s.Unlock()
-	if client, ok := c.(*Client); ok {
-		s.client = client
-		return nil
-	}
-	return errors.Errorf("unkonw client type: %v", c)
-}
-
-func (s *Chat) GetClient() types.IClient {
-	s.RLock()
-	defer s.RUnlock()
-	return s.client
 }

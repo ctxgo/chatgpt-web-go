@@ -15,7 +15,7 @@ import (
 // 会话有效期15分钟
 const defaultChatExpiration = 15 * time.Minute
 
-// 每隔16分钟执行一次清理，清理过期会话
+// 每隔16分钟清理过期会话
 const defaultChatCleanupInterval = 16 * time.Minute
 
 type Host struct {
@@ -45,8 +45,8 @@ type ClientManager struct {
 	scheduleType scheduleType
 	Scheduler    *SchedulerFactory
 
-	clients    map[string][]*Client
-	clientLock sync.RWMutex
+	clients map[string][]*Client
+	sync.RWMutex
 
 	chatManager ChatManager
 }
@@ -85,7 +85,7 @@ func NewClientManager(opts ...Opt) *ClientManager {
 	return c
 }
 
-func createClient(h Host) (client *Client, err error) {
+func createIClient(h Host) (client *Client, err error) {
 	var ilient types.IClient
 	switch h.AiType {
 	case "gemini":
@@ -107,9 +107,13 @@ func createClient(h Host) (client *Client, err error) {
 }
 
 func (c *ClientManager) CreateClient(h Host) error {
-	c.clientLock.Lock()
-	defer c.clientLock.Unlock()
-	client, err := createClient(h)
+	c.Lock()
+	defer c.Unlock()
+	return c.createClient(h)
+}
+
+func (c *ClientManager) createClient(h Host) error {
+	client, err := createIClient(h)
 	if err != nil {
 		return err
 	}
@@ -118,8 +122,8 @@ func (c *ClientManager) CreateClient(h Host) error {
 }
 
 func (c *ClientManager) DeleteClient(h Host) {
-	c.clientLock.Lock()
-	defer c.clientLock.Unlock()
+	c.Lock()
+	defer c.Unlock()
 	var newData []*Client
 	data := c.clients[h.AiType]
 	for _, x := range data {
@@ -131,12 +135,12 @@ func (c *ClientManager) DeleteClient(h Host) {
 }
 
 func (c *ClientManager) UpdateClient(h Host) (err error) {
-	c.clientLock.Lock()
-	defer c.clientLock.Unlock()
+	c.Lock()
+	defer c.Unlock()
 	var newData []*Client
 	data := c.clients[h.AiType]
 	if len(data) == 0 {
-		return c.CreateClient(h)
+		return c.createClient(h)
 	}
 	for _, x := range data {
 		if x.host.Id != h.Id {
@@ -147,7 +151,7 @@ func (c *ClientManager) UpdateClient(h Host) (err error) {
 			newData = append(newData, x)
 			continue
 		}
-		client, rawErr := createClient(h)
+		client, rawErr := createIClient(h)
 		if rawErr != nil {
 			err = rawErr
 			continue
@@ -166,9 +170,6 @@ func (c *ClientManager) selectIndex(count int, scheduler Scheduler) (int, error)
 }
 
 func (c *ClientManager) getOnceClient(k string) (types.IClient, error) {
-	c.clientLock.RLock()
-	defer c.clientLock.RUnlock()
-
 	data := c.clients[k]
 
 	scheduler := c.Scheduler.GetOrCreateScheduler(k, c.scheduleType)
@@ -185,32 +186,36 @@ func (c *ClientManager) DelChat(conversationID string) {
 
 // bool值为false说明chat已经存在
 func (c *ClientManager) CreateChat(conversationID, aiType string) (bool, types.IChat, error) {
-	var (
-		created bool
-		err     error
-	)
-	chat, ok := c.chatManager.Get(conversationID)
-	created = !ok
+	c.RLock()
+	chat, ok, err := c.getAndSetChat(conversationID, aiType)
+	c.RUnlock()
 	if ok {
-		switch chat.(type) {
-		case *gemini.Chat:
-			if aiType != "gemini" {
-				created = true
-			}
-		case *gpt.Chat:
-			if aiType != "openai" {
-				created = true
-			}
-		}
+		return false, chat, err
 	}
-	if created {
-		chat, err = c.createChat(conversationID, aiType)
+	c.Lock()
+	defer c.Unlock()
+	chat, ok, err = c.getAndSetChat(conversationID, aiType)
+	if ok {
+		return false, chat, err
 	}
-	c.setChat(chat, aiType)
-	return created, chat, err
+	chat, err = c.createIChat(conversationID, aiType)
+	if err != nil {
+		return false, nil, err
+	}
+	return true, chat, c.setChat(chat, aiType)
 }
 
-func (c *ClientManager) createChat(conversationID, aiType string) (types.IChat, error) {
+// checkIfChatNeedsCreation 辅助函数，判断是否需要创建新的 chat
+func (c *ClientManager) getAndSetChat(conversationID, aiType string) (types.IChat, bool, error) {
+	chat, ok := c.chatManager.Get(conversationID)
+	if !ok || chat.GetChatType() != aiType {
+		return nil, false, nil
+	}
+
+	return chat, true, c.setChat(chat, aiType)
+}
+
+func (c *ClientManager) createIChat(conversationID, aiType string) (types.IChat, error) {
 	var chat types.IChat
 	switch aiType {
 	case "gemini":
@@ -224,11 +229,10 @@ func (c *ClientManager) createChat(conversationID, aiType string) (types.IChat, 
 	return chat, nil
 }
 
-func (c *ClientManager) setChat(ch types.IChat, clientType string) (types.IChat, error) {
+func (c *ClientManager) setChat(ch types.IChat, clientType string) error {
 	client, err := c.getOnceClient(clientType)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	err = ch.SetClient(client)
-	return ch, err
+	return ch.SetClient(client)
 }

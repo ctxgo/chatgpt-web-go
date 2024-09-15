@@ -92,7 +92,9 @@ func (s *Chat) GetClient() types.IClient {
 	defer s.RUnlock()
 	return s.client
 }
-
+func (s *Chat) GetChatType() string {
+	return "gemini"
+}
 func (s *Chat) AddHistory(message string, role string) {
 	s.Lock()
 	defer s.Unlock()

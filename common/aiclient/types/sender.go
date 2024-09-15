@@ -10,6 +10,7 @@ type IClient interface {
 }
 
 type IChat interface {
+	GetChatType() string
 	SetClient(c IClient) error
 	GetClient() IClient
 	SetMaxHistory(int)
