@@ -8,7 +8,7 @@ A commercially-viable ChatGpt web application built with Go.
 可部署商业化的 ChatGpt 网页应用。
 
 
-💡 本项目是后端服务，前端对应的项目是：[79E/ChatGPT-Web](https://github.com/ctxgo/ChatGpt-Web)
+💡 本项目是后端服务，前端对应的项目是：[ctxgo/ChatGpt-Web](https://github.com/ctxgo/ChatGpt-Web)
 
 </div>
 <br>
@@ -98,7 +98,7 @@ emailServer:
 **前端服务**
 
 前端服务安装参考：
-[79E/ChatGPT-Web](https://github.com/ctxgo/ChatGpt-Web)
+[ctxgo/ChatGpt-Web](https://github.com/ctxgo/ChatGpt-Web)
 ```
 前端项目需要修改配置文件 .env.development, 指向本地服务端：
 VITE_APP_REQUEST_HOST=http://127.0.0.1:8899
