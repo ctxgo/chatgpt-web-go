@@ -7,15 +7,16 @@ A commercially-viable ChatGpt web application built with Go.
 
 可部署商业化的 ChatGpt 网页应用。
 
+
+💡 本项目是后端服务，前端对应的项目是：[79E/ChatGPT-Web](https://github.com/ctxgo/ChatGpt-Web)
+
+</div>
+<br>
+
 > [!IMPORTANT]
 > **此项目 Fork 自 [neoean/chatgpt-web-go](https://github.com/neoean/chatgpt-web-go)**
 >
 > 添加 gemini 支持
-
-💡 本项目是后端服务，前端对应的项目是：[79E/ChatGPT-Web](https://github.com/ctxgo/ChatGpt-Web)
-
-
-</div>
 
 
 ## 主要功能
@@ -103,7 +104,11 @@ emailServer:
 VITE_APP_REQUEST_HOST=http://127.0.0.1:8899
 ```
 
-
+#### 登录信息
+```
+账号: admin@c.om
+密码: admin123
+```
 
 ### 页面截图
 
