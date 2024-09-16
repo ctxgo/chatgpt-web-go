@@ -206,6 +206,9 @@ func (c *Chat) buildModel(msg types.IMessage) {
 	if opts.AiInstruction != "" {
 		c.model.SystemInstruction = genai.NewUserContent(genai.Text(opts.AiInstruction))
 	}
+	if opts.Temperature != 0 {
+		c.model.SetTemperature(opts.Temperature)
+	}
 	c.session = c.model.StartChat()
 	if opts.MaxTokens != nil {
 		c.model.MaxOutputTokens = opts.MaxTokens
