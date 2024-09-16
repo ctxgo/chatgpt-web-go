@@ -4,6 +4,7 @@ import (
 	"chatgpt-web-new-go/common/aiclient/types"
 	"chatgpt-web-new-go/pkgs/limitdata"
 	"context"
+	"fmt"
 	"sync"
 
 	"github.com/google/generative-ai-go/genai"
@@ -182,6 +183,9 @@ func (s *Chat) addHistory(message string, role string) {
 		role = "model"
 	case types.MessageRoleUser:
 		role = "user"
+	default:
+		fmt.Printf("WARN: unkown role type: %s\n", role)
+		return
 	}
 	s.history.Add(&genai.Content{
 		Parts: []genai.Part{genai.Text(message)},
@@ -199,6 +203,9 @@ func (s *Chat) loadHistory() {
 func (c *Chat) buildModel(msg types.IMessage) {
 	opts := msg.GetOptions()
 	c.model = newModelWithSafety(c.client.Client, opts.Model)
+	if opts.AiInstruction != "" {
+		c.model.SystemInstruction = genai.NewUserContent(genai.Text(opts.AiInstruction))
+	}
 	c.session = c.model.StartChat()
 	if opts.MaxTokens != nil {
 		c.model.MaxOutputTokens = opts.MaxTokens

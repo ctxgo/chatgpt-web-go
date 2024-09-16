@@ -32,6 +32,10 @@ func Delete(ctx context.Context, id int64) error {
 		return bizError.CommonDeleteError
 	}
 
+	err = delPersonaCache(ctx, generateCacheKey(id))
+	if err != nil {
+		return bizError.CommonDeleteError
+	}
 	return nil
 }
 
@@ -43,12 +47,12 @@ func Add(ctx context.Context, n *model.Persona) error {
 		logs.Error("Persona create error: %v", err)
 		return err
 	}
-
-	return nil
+	return setPersonaCache(ctx, generateCacheKey(n.ID), n)
 }
-func Update(ctx context.Context, u *model.Persona) error {
+
+func Update(ctx context.Context, n *model.Persona) error {
 	du := dao.Q.Persona
-	resultInfo, err := du.WithContext(ctx).Where(du.ID.Eq(u.ID)).Updates(u)
+	resultInfo, err := du.WithContext(ctx).Where(du.ID.Eq(n.ID)).Updates(n)
 	if err != nil {
 		logs.Error("Persona update error: %v", err)
 		return err
@@ -57,6 +61,9 @@ func Update(ctx context.Context, u *model.Persona) error {
 		logs.Error("Persona update fail: RowsAffected < 1")
 		return bizError.CommonUpdateError
 	}
-
+	err = setPersonaCache(ctx, generateCacheKey(n.ID), n)
+	if err != nil {
+		return bizError.CommonUpdateError
+	}
 	return nil
 }

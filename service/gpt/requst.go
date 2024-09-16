@@ -1,10 +1,10 @@
 package gpt
 
 type Request struct {
-	ParentMessageId string      `json:"parentMessageId"`
-	PersonaId       interface{} `json:"persona_id"`
-	Prompt          string      `json:"prompt"`
-	Options         Options     `json:"options"`
+	ParentMessageId string  `json:"parentMessageId"`
+	PersonaId       int64   `json:"persona_id"`
+	Prompt          string  `json:"prompt"`
+	Options         Options `json:"options"`
 }
 
 type Options struct {

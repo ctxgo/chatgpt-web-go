@@ -24,6 +24,8 @@ var (
 	CommonUpdateError = NewBizError(-100, "更新异常！")
 	CommonDeleteError = NewBizError(-200, "删除异常！")
 
+	PersonaGetError = NewBizError(-300, "角色查询异常！")
+
 	LoginCodeNoneError     = NewBizError(100000, "验证码不能为空！")
 	LoginPassCodeNoneError = NewBizError(100001, "密码或验证码不能为空！")
 	LoginCodeErrorError    = NewBizError(100002, "验证码错误！")

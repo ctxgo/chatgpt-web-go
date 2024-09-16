@@ -6,6 +6,8 @@ import (
 	"chatgpt-web-new-go/common/goUtil"
 	"chatgpt-web-new-go/common/logs"
 	"chatgpt-web-new-go/common/types"
+	"chatgpt-web-new-go/service/persona"
+	"context"
 
 	aiTypes "chatgpt-web-new-go/common/aiclient/types"
 	"chatgpt-web-new-go/dao"
@@ -39,6 +41,15 @@ func Process(ctx *gin.Context, r *Request, uid int64) (stream <-chan aiTypes.Str
 		logs.Logger.Errorf("get client err: %v!", err)
 		return nil, bizError.AiKeyNoneUsefullError
 	}
+	var personaContext string
+	if r.PersonaId != 0 {
+		personaContext, err = getPersonaContext(ctx, r.PersonaId)
+		if err != nil {
+			logs.Logger.Errorf("get persona  err: %v!", err)
+			return nil, bizError.PersonaGetError
+
+		}
+	}
 
 	stream, err = chat.SendStreamMessage(ctx, aiTypes.TextMessage{
 		Options: aiTypes.Options{
@@ -47,6 +58,7 @@ func Process(ctx *gin.Context, r *Request, uid int64) (stream <-chan aiTypes.Str
 			Temperature:      r.Options.Temperature,
 			PresencePenalty:  r.Options.PresencePenalty,
 			FrequencyPenalty: r.Options.FrequencyPenalty,
+			AiInstruction:    personaContext,
 		},
 		Prompt: r.Prompt,
 	})
@@ -120,4 +132,12 @@ func addMessage(ctx *gin.Context, r *Request, uid int64) {
 	if err != nil {
 		logs.Error("message create error: %v", err)
 	}
+}
+
+func getPersonaContext(ctx context.Context, id int64) (string, error) {
+	persona, err := persona.PersonaInfo(ctx, id)
+	if err != nil {
+		return "", err
+	}
+	return persona.Context, nil
 }

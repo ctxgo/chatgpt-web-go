@@ -16,6 +16,7 @@ type Options struct {
 	Model            string
 	PresencePenalty  float32
 	Temperature      float32
+	AiInstruction    string
 }
 
 type IMessage interface {

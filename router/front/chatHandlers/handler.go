@@ -96,18 +96,15 @@ func ChatCompletionsHandler(c *gin.Context) {
 	})
 }
 
+// 正则表达式用于匹配 'model(aiType)' 格式
 func parseModel(model string) (string, string, error) {
-	// 正则表达式用于匹配 'model(aiType)' 格式
 	re := regexp.MustCompile(`^(.*)\((.*)\)$`)
 
-	// 使用正则表达式匹配并提取
 	matches := re.FindStringSubmatch(model)
 
-	// 如果匹配成功，返回 model 和 aiType
 	if len(matches) == 3 {
-		return matches[1], matches[2], nil // matches[1] 是 model, matches[2] 是 aiType
+		return matches[1], matches[2], nil
 	}
 
-	// 如果格式不正确，返回空值
 	return "", "", errors.Errorf("模型格式无法解析，%v", model)
 }
