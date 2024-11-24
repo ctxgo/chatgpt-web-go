@@ -106,7 +106,7 @@ VITE_APP_REQUEST_HOST=http://127.0.0.1:8899
 
 #### 登录信息
 ```
-账号: admin@c.om
+账号: admin
 密码: admin123
 ```
 

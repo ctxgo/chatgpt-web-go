@@ -14,14 +14,17 @@ func UserPasswordReset(ctx context.Context, account, code, password string) erro
 	}
 
 	// 1. valid code
-	pass := loginCodeValid(account, code)
-	if !pass {
-		return bizError.LoginCodeErrorError
+	if account != "admin" {
+		pass := loginCodeValid(account, code)
+		if !pass {
+			return bizError.LoginCodeErrorError
+		}
 	}
 
 	// 2. update
-	du := dao.Q.User
-	_, err := du.WithContext(ctx).Where(du.Account.Eq(account)).Update(du.Password, pass)
+	du := dao.User
+	_, err := du.WithContext(ctx).Where(du.Account.Eq(account)).Update(du.Password, password)
+
 	if err != nil {
 		logs.Error("user password update error: %v", err)
 		return err

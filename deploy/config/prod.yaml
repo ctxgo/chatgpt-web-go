@@ -2,14 +2,13 @@ port: 8899
 
 db:
   type: mysql
-  host: 127.0.0.1:3306
-  hostR1: 127.0.0.1:3306
+  host: ai-mysql:3306
   user: root
   password: yourpassword
-  name: chatgpt_web_new_go
+  name: dev
 
 redis:
-  addr: 127.0.0.1:6379
+  addr: redis:6379
   password: yourpassword
 
 aiClient:

@@ -57,7 +57,7 @@ type inviteRecord struct {
 	SuperiorID field.Int64  // 上级ID（一旦确定将不可修改）
 	Reward     field.String // 奖励
 	RewardType field.String // 奖励类型
-	Status     field.Int32  // 1正常
+	Status     field.Int32  // 0-异常｜1-正常发放｜3-审核中
 	Remarks    field.String // 评论
 	IP         field.String
 	UserAgent  field.String // ua

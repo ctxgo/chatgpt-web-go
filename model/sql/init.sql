@@ -129,29 +129,29 @@ CREATE TABLE `config` (
 -- Records of config
 -- ----------------------------
 BEGIN;
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (1, 'signin_reward', '100', '签到奖励', '2023-05-19 16:21:12', '2023-07-10 22:06:37');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (2, 'register_reward', '100', '注册奖励', '2023-05-19 16:21:49', '2023-07-11 09:44:11');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (3, 'ai3_carry_count', '30', '3版本携带历史聊天数量', '2023-05-21 14:57:37', '2023-07-11 09:44:22');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (4, 'ai3_ratio', '100', '3版本比例 每1积分等于多少token', '2023-05-25 16:40:18', '2023-07-10 23:28:38');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (5, 'ai4_ratio', '0.1', '4版本比例 每1积分等于多少token', '2023-05-25 16:40:20', '2023-06-26 14:26:09');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (6, 'draw_price', '50', '绘画价格 ', '2023-05-25 16:58:26', '2023-07-10 22:06:58');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (7, 'shop_introduce', '<p><br></p>', '商城介绍', '2023-05-29 11:51:39', '2023-07-11 00:42:36');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (8, 'user_introduce', '<p><br></p>', '用户中心介绍', '2023-05-29 11:52:07', '2023-07-11 00:42:39');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (9, 'website_title', 'openai', '网站标题', '2023-06-07 11:08:56', '2023-07-11 09:44:00');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (10, 'website_description', '我是一个基于OpenAI的ChatGpt应用。', '网站描述', '2023-06-07 11:08:57', '2023-07-09 22:23:14');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (11, 'website_keywords', 'Openai,chat,Gpt,AI', '网站关键词', '2023-06-07 11:09:44', '2023-07-09 22:23:14');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (12, 'website_logo', 'local', '网站logo', '2023-06-07 11:10:05', '2023-06-07 13:01:39');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (13, 'website_footer', '', '网站页脚信息html', '2023-06-07 11:12:13', '2023-06-20 19:32:16');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (14, 'prohibited_words', '习近平,共产党', '违禁词', '2023-06-09 10:04:13', '2023-06-09 12:55:50');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (15, 'tuputech_key', '', '内容检查KEY', '2023-06-09 11:20:51', '2023-06-10 17:37:28');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (16, 'invite_introduce', '<p><br></p>', '邀请页面说明', '2023-06-10 17:37:02', '2023-07-11 00:42:44');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (17, 'invite_reward', '1000', '邀请奖励', '2023-06-10 18:13:30', '2023-07-10 22:06:37');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (18, 'cashback_ratio', '10', '', '2023-06-10 18:40:02', '2023-07-11 09:44:15');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (19, 'sms', '{"user":"duanxinbao","password":"duanxinbao","sign":"Ai之家","template":"您的验证码为：{code}，有效期{time}分钟，请勿泄露。如非本人操作，请忽略此短信。谢谢！"}', '', '2023-06-24 20:09:59', '2023-07-11 09:44:54');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (20, 'email', '{"host":"smtp.163.com","port":465,"user":"noticecode@163.com","pass":"DQXHGOZAZLZCIUCZ","from_title":"Ai之家","subject":"系统邮件通知"}', '', '2023-06-24 20:35:11', '2023-07-11 09:45:01');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (21, 'ai4_carry_count', '10', '4版本携带历史聊天数量', '2023-06-25 14:44:08', '2023-07-10 22:05:59');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (22, 'cloud_storage', '{"type":"local"}', '', '2023-07-30 19:24:05', '2023-08-06 17:06:07');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (23, 'chat_models', '[
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (1, 'signin_reward', '100', '签到奖励', '2023-05-19 16:21:12', '2023-07-10 22:06:37');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (2, 'register_reward', '100', '注册奖励', '2023-05-19 16:21:49', '2023-07-11 09:44:11');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (3, 'ai3_carry_count', '30', '3版本携带历史聊天数量', '2023-05-21 14:57:37', '2023-07-11 09:44:22');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (4, 'ai3_ratio', '100', '3版本比例 每1积分等于多少token', '2023-05-25 16:40:18', '2023-07-10 23:28:38');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (5, 'ai4_ratio', '0.1', '4版本比例 每1积分等于多少token', '2023-05-25 16:40:20', '2023-06-26 14:26:09');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (6, 'draw_price', '50', '绘画价格 ', '2023-05-25 16:58:26', '2023-07-10 22:06:58');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (7, 'shop_introduce', '<p><br></p>', '商城介绍', '2023-05-29 11:51:39', '2023-07-11 00:42:36');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (8, 'user_introduce', '<p><br></p>', '用户中心介绍', '2023-05-29 11:52:07', '2023-07-11 00:42:39');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (9, 'website_title', 'openai', '网站标题', '2023-06-07 11:08:56', '2023-07-11 09:44:00');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (10, 'website_description', '我是一个基于OpenAI的ChatGpt应用。', '网站描述', '2023-06-07 11:08:57', '2023-07-09 22:23:14');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (11, 'website_keywords', 'Openai,chat,Gpt,AI', '网站关键词', '2023-06-07 11:09:44', '2023-07-09 22:23:14');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (12, 'website_logo', 'local', '网站logo', '2023-06-07 11:10:05', '2023-06-07 13:01:39');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (13, 'website_footer', '', '网站页脚信息html', '2023-06-07 11:12:13', '2023-06-20 19:32:16');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (14, 'prohibited_words', '习近平,共产党', '违禁词', '2023-06-09 10:04:13', '2023-06-09 12:55:50');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (15, 'tuputech_key', '', '内容检查KEY', '2023-06-09 11:20:51', '2023-06-10 17:37:28');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (16, 'invite_introduce', '<p><br></p>', '邀请页面说明', '2023-06-10 17:37:02', '2023-07-11 00:42:44');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (17, 'invite_reward', '1000', '邀请奖励', '2023-06-10 18:13:30', '2023-07-10 22:06:37');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (18, 'cashback_ratio', '10', '', '2023-06-10 18:40:02', '2023-07-11 09:44:15');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (19, 'sms', '{"user":"duanxinbao","password":"duanxinbao","sign":"Ai之家","template":"您的验证码为：{code}，有效期{time}分钟，请勿泄露。如非本人操作，请忽略此短信。谢谢！"}', '', '2023-06-24 20:09:59', '2023-07-11 09:44:54');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (20, 'email', '{"host":"smtp.163.com","port":465,"user":"noticecode@163.com","pass":"DQXHGOZAZLZCIUCZ","from_title":"Ai之家","subject":"系统邮件通知"}', '', '2023-06-24 20:35:11', '2023-07-11 09:45:01');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (21, 'ai4_carry_count', '10', '4版本携带历史聊天数量', '2023-06-25 14:44:08', '2023-07-10 22:05:59');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (22, 'cloud_storage', '{"type":"local"}', '', '2023-07-30 19:24:05', '2023-08-06 17:06:07');
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (23, 'chat_models', '[
     {
         "app":"openai",
         "label":"aiClient-3.5-turbo-0613",
@@ -177,7 +177,7 @@ INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, up
         "value":"aiClient-3.5-turbo"
     }
 ]', '', '2023-08-27 15:06:07', '2023-08-27 15:27:11');
-INSERT INTO chatgpt_web_new_go.config (id, name, value, remarks, create_time, update_time) VALUES (24, 'draw_models', '[
+INSERT INTO config (id, name, value, remarks, create_time, update_time) VALUES (24, 'draw_models', '[
     {
         "label":"stable-diffusion-v1-5",
         "value":"stable-diffusion-v1-5",
@@ -572,7 +572,7 @@ CREATE TABLE `user` (
 -- Records of user
 -- ----------------------------
 BEGIN;
-INSERT INTO `user` (`id`, `nickname`, `account`, `password`, `avatar`, `role`, `integral`, `vip_expire_time`, `svip_expire_time`, `status`, `ip`, `create_time`, `update_time`, `invite_code`, `superior_id`, `user_agent`) VALUES (600000000000001, 'openai用户', 'admin@c.om', '$2a$14$q9rNu31Gus5eQMgkCIwYWORSAry2jlR.0uYGC5XjlqYUlNyMU2n.W', 'local', 'administrator', 99999, '2023-06-25 00:00:00', '2023-03-23 00:00:00', 1, '127.0.0.1', '2023-06-24 20:36:20', '2023-07-21 00:55:01', '30e9bcbb', '0', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36');
+INSERT INTO `user` (`id`, `nickname`, `account`, `password`, `avatar`, `role`, `integral`, `vip_expire_time`, `svip_expire_time`, `status`, `ip`, `create_time`, `update_time`, `invite_code`, `superior_id`, `user_agent`) VALUES (600000000000001, 'openai用户', 'admin', '$2a$14$q9rNu31Gus5eQMgkCIwYWORSAry2jlR.0uYGC5XjlqYUlNyMU2n.W', 'local', 'administrator', 99999, '2023-06-25 00:00:00', '2023-03-23 00:00:00', 1, '127.0.0.1', '2023-06-24 20:36:20', '2023-07-21 00:55:01', '30e9bcbb', '0', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36');
 COMMIT;
 
 -- ----------------------------

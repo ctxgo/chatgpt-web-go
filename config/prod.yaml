@@ -1,0 +1,22 @@
+port: 8899
+
+db:
+  type: mysql
+  host: mysql:3306
+  user: root
+  password: yourpassword
+  name: dev
+
+redis:
+  addr: redis:6379
+  password: yourpassword
+
+aiClient:
+  proxy: xxxxxxxxxxxxx
+
+emailServer:
+  host: "xxxxxxxxxx"
+  port: "587"
+  SenderName: xxxxxx
+  User: xxxxxxxxx
+  Password: xxxxxx

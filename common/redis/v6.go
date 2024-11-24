@@ -2,6 +2,7 @@ package redis
 
 import (
 	"chatgpt-web-new-go/common/config"
+	"chatgpt-web-new-go/pkgs/retry"
 	"context"
 
 	"github.com/redis/go-redis/v9"
@@ -14,8 +15,9 @@ func Init() {
 		Password: redisConfig.Password, // Redis 服务器没有设置密码
 		DB:       redisConfig.DB,       // 使用默认数据库
 	})
-
-	err := connect(config.Redis)
+	err := retry.Retry(func() error {
+		return connect(config.Redis)
+	})
 	if err != nil {
 		panic(err)
 	}

@@ -2,6 +2,8 @@ package model
 
 import (
 	"chatgpt-web-new-go/common/auth/password"
+	"errors"
+
 	"gorm.io/gorm"
 )
 
@@ -12,8 +14,20 @@ func (user *User) ComparePassword(_password string) bool {
 
 // BeforeSave 保存前
 func (user *User) BeforeSave(tx *gorm.DB) (err error) {
-	if !password.IsHashed(user.Password) {
-		user.Password = password.Hash(user.Password)
+	var newPass string
+	switch u := tx.Statement.Dest.(type) {
+	case map[string]interface{}:
+		newPass = u["password"].(string)
+	case *User:
+		newPass = u.Password
+	case []*User:
+		newPass = u[tx.Statement.CurDestIndex].Password
+	default:
+		return errors.New("User.BeforeSave hook 错误，类型断言失败")
+	}
+	if !password.IsHashed(newPass) {
+		password := password.Hash(newPass)
+		tx.Statement.SetColumn("password", password)
 	}
 	return
 }

@@ -1,23 +1,27 @@
 package db
 
 import (
+	"bufio"
+	"bytes"
 	"chatgpt-web-new-go/common/config"
 	"chatgpt-web-new-go/dao"
-	"database/sql"
+	"chatgpt-web-new-go/pkgs/retry"
+
+	sqlFilr "chatgpt-web-new-go/model/sql"
+	"errors"
 	"fmt"
-	"github.com/mattn/go-sqlite3"
-	"gorm.io/driver/mysql"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 	"log"
 	"os"
+	"strings"
 	"time"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var dbTypeInitializer = map[string]func(){
-	"mysql":  initMysql,
-	"sqlite": initSqlite,
+	"mysql": initMysql,
 }
 
 func Init() {
@@ -36,7 +40,37 @@ func initMysql() {
 		dbConfig.User, dbConfig.Password, dbConfig.Host, dbConfig.Name)
 
 	var err error
-	config.DB, err = gorm.Open(
+	retry.Retry(
+		func() error {
+			config.DB, err = openDB(dsn)
+			return err
+		},
+		retry.WithAttempts(10),
+	)
+	if err != nil {
+		panic(err)
+	}
+	sqlDB, err := config.DB.DB()
+	if err != nil {
+		panic(err)
+	}
+	sqlDB.SetMaxIdleConns(5)
+	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetConnMaxLifetime(time.Hour)
+
+	if err := initializeDBData(config.DB); err != nil {
+		panic(err)
+	}
+	// migrate
+	//err = config.DB.AutoMigrate(&user.User{})
+	//if err != nil {
+	//	panic(err)
+	//}
+}
+
+func openDB(dsn string) (db *gorm.DB, err error) {
+
+	return gorm.Open(
 		mysql.New(mysql.Config{
 			DSN:                       dsn,   // data source name
 			DefaultStringSize:         256,   // default size for string fields
@@ -55,35 +89,58 @@ func initMysql() {
 				},
 			),
 		})
-	if err != nil {
-		panic(err)
-	}
-	sqlDB, err := config.DB.DB()
-	sqlDB.SetMaxIdleConns(5)
-	sqlDB.SetMaxOpenConns(100)
-	sqlDB.SetConnMaxLifetime(time.Hour)
-
-	// migrate
-	//err = config.DB.AutoMigrate(&user.User{})
-	//if err != nil {
-	//	panic(err)
-	//}
 }
 
-// initSqlite 数据库初始化，包括新建数据库（如果还没有建立），基本数据的读写
-func initSqlite() {
-	sql.Register("sqlite3_simple",
-		&sqlite3.SQLiteDriver{
-			Extensions: []string{
-				"libsimple-osx-x64/libsimple",
-			},
-		},
-	)
-
-	var err error
-	config.DB, err = gorm.Open(sqlite.Open("data.db"), &gorm.Config{})
+func initializeDBData(db *gorm.DB) error {
+	err := db.AutoMigrate(&DBInitStatus{})
 	if err != nil {
-		panic("failed to connect database")
+		return err
 	}
+	return db.Transaction(func(tx *gorm.DB) error {
+		// 尝试获取一个全局锁
+		var lockStatus int
+		err := tx.Raw("SELECT GET_LOCK('db_init_lock', 10)").Scan(&lockStatus).Error
+		if err != nil || lockStatus != 1 {
+			return fmt.Errorf("failed to acquire lock: %v", err)
+		}
+		defer tx.Exec("SELECT RELEASE_LOCK('db_init_lock')") // 确保锁被释放
 
+		var initStatus DBInitStatus
+		err = tx.First(&initStatus, 1).Error
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
+
+		if err == nil && initStatus.Initialized {
+			fmt.Println("Initialized", config.Config.Db)
+			return nil
+		}
+
+		if err := executeEmbeddedSQL(tx); err != nil {
+			return err
+		}
+
+		return tx.Save(&DBInitStatus{ID: 1, Initialized: true}).Error
+	})
+}
+
+func executeEmbeddedSQL(db *gorm.DB) error {
+	scanner := bufio.NewScanner(bytes.NewReader(sqlFilr.EmbeddedSQLData))
+	var statement strings.Builder
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.TrimSpace(line) == "" || strings.HasPrefix(strings.TrimSpace(line), "--") { // 忽略空行和注释
+			continue
+		}
+		statement.WriteString(line)
+		if strings.HasSuffix(strings.TrimSpace(line), ";") {
+			execSQL := statement.String()[:statement.Len()-1] // 移除末尾的分号
+			if err := db.Exec(execSQL).Error; err != nil {
+				return err
+			}
+			statement.Reset() // 重置字符串构建器
+		}
+	}
+	return scanner.Err()
 }

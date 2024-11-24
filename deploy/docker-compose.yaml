@@ -1,0 +1,65 @@
+version: "3"
+services:
+  ai-go:
+    image: ctxgo/ai-go
+    container_name: ai-go
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - 8899:8899
+    volumes:
+      - ./config/prod.yaml:/config.yaml
+      - ./basedir:/basedir
+    depends_on:
+      - ai-mysql
+      - ai-redis
+    networks:
+      ai-go-network:
+
+  ai-go-ui:
+    image: ctxgo/ai-go-ui
+    container_name: ai-go-ui
+    volumes:
+        - ./config/nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 10091:80
+    restart: always
+    depends_on:
+      - ai-go
+    networks:
+      ai-go-network:        
+
+  ai-mysql:
+    container_name: ai-mysql
+    image: mysql:8.2
+    environment:
+      MYSQL_ROOT_PASSWORD: yourpassword
+      MYSQL_DATABASE: dev
+    ports:
+      - '23306:3306'
+    volumes:
+      - './mysql/data:/var/lib/mysql'
+      - './mysql/my.cnf:/etc/mysql/conf.d/my.cnf'
+    networks:
+      ai-go-network:
+        aliases:
+          - mysql
+
+  ai-redis:
+    image: redis:7.2.5-alpine3.20
+    container_name: ai-redis
+    command: ["redis-server", "/etc/redis/redis.conf"]
+    ports:
+    - 26379:6379
+    volumes:
+    - ./redis/redis.conf:/etc/redis/redis.conf:r
+    - ./redis/data:/data
+    - /etc/localtime:/etc/localtime
+    networks:
+      ai-go-network:
+        aliases:
+            - redis
+
+networks:
+  ai-go-network:
