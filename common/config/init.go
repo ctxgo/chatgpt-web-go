@@ -27,7 +27,7 @@ func InitConfig() {
 	v.SetConfigFile(configFile)
 
 	//设置配置文件类型
-	v.SetConfigType("yml")
+	v.SetConfigType("yaml")
 
 	if err := v.ReadInConfig(); err != nil {
 		panic(err)
@@ -36,7 +36,12 @@ func InitConfig() {
 	// command line args
 	commandLineConfig(v)
 
-	Config = &Configuration{}
+	Config = &Configuration{
+		Db:          new(dbConfig),
+		Redis:       new(redisConfig),
+		AiClient:    new(gptConfig),
+		EmailServer: new(emailServerConfig),
+	}
 	err := v.Unmarshal(Config)
 	if err != nil {
 		panic(err)

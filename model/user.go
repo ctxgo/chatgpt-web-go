@@ -14,6 +14,9 @@ func (user *User) ComparePassword(_password string) bool {
 
 // BeforeSave 保存前
 func (user *User) BeforeSave(tx *gorm.DB) (err error) {
+	if !tx.Statement.Changed("password") {
+		return nil
+	}
 	var newPass string
 	switch u := tx.Statement.Dest.(type) {
 	case map[string]interface{}:
