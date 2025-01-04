@@ -3,81 +3,94 @@ package lockx
 import (
 	"fmt"
 	"sync"
-	"sync/atomic"
 )
 
-////////////////////////////////////
-// KeyRWMutex: RWMutex-based lock  //
-////////////////////////////////////
-
-// RWMutex represents a read/write lock for a specific resource with reference counting.
+// RWMutex is a reference-counted read/write lock for a single resource.
 type RWMutex struct {
-	sync.RWMutex       // RWMutex for shared (read) or exclusive (write) access.
-	refCount     int32 // Reference count to track how many goroutines hold this lock.
+	sync.RWMutex
+	refCount int
 }
 
-// KeyRWMutex manages multiple read/write locks based on resource keys.
+// KeyRWMutex manages multiple RWMutex locks keyed by string.
+//
+// A single global mutex (km.mu) protects the `locks` map and ensures correct
+// refCount increments/decrements. When refCount hits 0, the lock is removed.
 type KeyRWMutex struct {
-	locks sync.Map // Concurrent-safe map for managing multiple resource locks.
+	mu    sync.Mutex
+	locks map[string]*RWMutex
 }
 
-// NewKeyRWMutex creates and returns a new instance of KeyRWMutex.
+// NewKeyRWMutex instantiates a KeyRWMutex with an internal map.
 func NewKeyRWMutex() *KeyRWMutex {
-	return &KeyRWMutex{}
-}
-
-func (km *KeyRWMutex) lock(key string, lockFunc func(*RWMutex)) {
-	rwMutex := km.getOrCreateLock(key)
-	atomic.AddInt32(&rwMutex.refCount, 1)
-	lockFunc(rwMutex)
-}
-
-// Lock locks the specified key's mutex for writing, ensuring exclusive access.
-func (km *KeyRWMutex) Lock(key string) {
-	km.lock(key, func(r *RWMutex) {
-		r.Lock()
-	})
-}
-
-// RLock locks the specified key's mutex for reading, allowing shared access.
-func (km *KeyRWMutex) RLock(key string) {
-	km.lock(key, func(r *RWMutex) {
-		r.RLock()
-	})
-}
-
-func (km *KeyRWMutex) unlock(key string, unlockFunc func(k string)) {
-	if m, ok := km.getLock(key); ok {
-		unlockFunc(key)
-		if atomic.AddInt32(&m.refCount, -1) == 0 {
-			km.locks.Delete(key)
-		}
-		return
+	return &KeyRWMutex{
+		locks: make(map[string]*RWMutex),
 	}
-	// Optionally, we could panic or log an error here if an unlock is attempted on a non-existent key.
-	panic(fmt.Sprintf("Unlock attempted on a key that was not locked: %s", key))
-
 }
 
-// Unlock releases the specified key's write lock.
+// ---------------------------
+//       Public Methods
+// ---------------------------
+
+// Lock obtains an exclusive (write) lock for the given key.
+func (km *KeyRWMutex) Lock(key string) {
+	km.doLock(key, (*RWMutex).Lock)
+}
+
+// RLock obtains a shared (read) lock for the given key.
+func (km *KeyRWMutex) RLock(key string) {
+	km.doLock(key, (*RWMutex).RLock)
+}
+
+// Unlock releases a write lock for the given key.
 func (km *KeyRWMutex) Unlock(key string) {
-	km.unlock(key, km.Unlock)
-
+	km.doUnlock(key, func(r *RWMutex) {
+		r.Unlock()
+	})
 }
 
-// RUnlock releases the specified key's read lock.
+// RUnlock releases a read lock for the given key.
 func (km *KeyRWMutex) RUnlock(key string) {
-	km.unlock(key, km.RUnlock)
+	km.doUnlock(key, (*RWMutex).RUnlock)
 }
 
-// getOrCreateLock retrieves an existing RWMutex or creates a new one if it doesn't exist.
-func (km *KeyRWMutex) getLock(key string) (*RWMutex, bool) {
-	actual, ok := km.locks.Load(key)
-	return actual.(*RWMutex), ok
+// ---------------------------
+//       Internal Logic
+// ---------------------------
+
+// doLock retrieves or creates an RWMutex for the key, increments its refCount,
+// then calls the provided lockMethod (which can be Lock or RLock).
+func (km *KeyRWMutex) doLock(key string, lockMethod func(*RWMutex)) {
+	km.mu.Lock()
+	rw, ok := km.locks[key]
+	if !ok {
+		rw = &RWMutex{}
+		km.locks[key] = rw
+	}
+	rw.refCount++
+	km.mu.Unlock()
+
+	// Actually lock it (either Lock or RLock)
+	lockMethod(rw)
 }
 
-// getOrCreateLock retrieves an existing RWMutex or creates a new one if it doesn't exist.
-func (km *KeyRWMutex) getOrCreateLock(key string) *RWMutex {
-	actual, _ := km.locks.LoadOrStore(key, &RWMutex{})
-	return actual.(*RWMutex)
+// doUnlock looks up the RWMutex for the key, calls the provided unlockMethod
+// (which can be Unlock or RUnlock), decrements refCount, and if refCount == 0
+// removes it from the map.
+func (km *KeyRWMutex) doUnlock(key string, unlockMethod func(*RWMutex)) {
+	km.mu.Lock()
+	rw, ok := km.locks[key]
+	if !ok {
+		km.mu.Unlock()
+		panic(fmt.Sprintf("Unlock called for unknown key %q", key))
+	}
+
+	// Perform the actual unlock (either Unlock or RUnlock)
+	unlockMethod(rw)
+
+	// Decrement refCount and remove if zero
+	rw.refCount--
+	if rw.refCount <= 0 {
+		delete(km.locks, key)
+	}
+	km.mu.Unlock()
 }
